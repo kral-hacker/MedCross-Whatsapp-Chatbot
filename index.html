@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TBCare Dashboard</title>
+<style>
+body{font-family:Arial,sans-serif;background:#f4f6f9;margin:0}
+header{background:#0f4c81;color:#fff;padding:16px 24px}
+.container{padding:20px;max-width:1200px;margin:auto}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:20px}
+.card{background:#fff;padding:18px;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.card h3{margin:0;font-size:14px;color:#666}
+.card p{font-size:28px;margin:10px 0 0}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+input{padding:10px;border:1px solid #ccc;border-radius:6px}
+button{padding:10px 16px;border:none;border-radius:6px;background:#0f4c81;color:#fff;cursor:pointer}
+button:hover{background:#0b3961}
+table{width:100%;border-collapse:collapse;background:#fff}
+th,td{padding:10px;border-bottom:1px solid #eee;text-align:left;font-size:14px}
+pre{background:#1e1e1e;color:#ddd;padding:15px;border-radius:8px;overflow:auto}
+</style>
+</head>
+<body>
+<header><h2>TBCare Dashboard</h2></header>
+
+<div class="container">
+
+<div class="cards">
+<div class="card"><h3>Total Leads</h3><p id="total">-</p></div>
+<div class="card"><h3>Completed</h3><p id="completed">-</p></div>
+<div class="card"><h3>Active</h3><p id="active">-</p></div>
+<div class="card"><h3>Bookings</h3><p id="bookings">-</p></div>
+</div>
+
+<div class="toolbar">
+<button onclick="loadDashboard()">Refresh Dashboard</button>
+<button onclick="loadLeads()">Load Leads</button>
+<input id="searchText" placeholder="Search phone/session/name">
+<button onclick="search()">Search</button>
+</div>
+
+<h3>Leads</h3>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Mobile</th>
+<th>Disease</th>
+<th>Center</th>
+<th>Booked</th>
+<th>Updated</th>
+</tr>
+</thead>
+<tbody id="leadBody"></tbody>
+</table>
+
+<h3>Search Result</h3>
+<pre id="result">No data</pre>
+
+</div>
+
+<script>
+const API="http://127.0.0.1:8001";
+
+async function loadDashboard(){
+    const r=await fetch(API+"/dashboard");
+    const d=await r.json();
+    total.textContent=d.total_leads;
+    completed.textContent=d.completed_conversations;
+    active.textContent=d.active_conversations;
+    bookings.textContent=d.bookings_confirmed;
+}
+
+async function loadLeads(){
+    const r=await fetch(API+"/leads?limit=20");
+    const d=await r.json();
+
+    leadBody.innerHTML="";
+
+    d.data.forEach(x=>{
+        leadBody.innerHTML+=`
+        <tr>
+            <td>${x.patient_name||""}</td>
+            <td>${x.mobile||""}</td>
+            <td>${x.disease_name||""}</td>
+            <td>${x.selected_center_name||""}</td>
+            <td>${x.booking_confirmed?"✅":"❌"}</td>
+            <td>${x.updated_at||""}</td>
+        </tr>`;
+    });
+}
+
+async function search(){
+    const q=document.getElementById("searchText").value;
+    const r=await fetch(API+"/search?q="+encodeURIComponent(q));
+    const d=await r.json();
+    result.textContent=JSON.stringify(d,null,2);
+}
+
+loadDashboard();
+loadLeads();
+</script>
+
+</body>
+</html>

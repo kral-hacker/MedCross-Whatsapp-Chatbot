@@ -22,6 +22,7 @@ CENTER_MAP = {
     4: {"doctor_id": 29,  "location_id": 2},
     8: {"doctor_id": 106, "location_id": 3},
     9: {"doctor_id": 159, "location_id": 4},
+    10: {"doctor_id": 4,"location_id":108}
 }
 
 
@@ -90,6 +91,7 @@ def add_patient(name: str, mobile: str, age: int = None,
     Register a new lead from the chatbot.
     Returns { leadId, name, mobile }
     """
+    doctor_id, location_id = _resolve_center(center_id)
     payload = {
         "name":     name,
         "mobile":   int(str(mobile).strip()),
@@ -98,7 +100,7 @@ def add_patient(name: str, mobile: str, age: int = None,
     }
     if age        is not None: payload["age"]              = int(age)
     if disease_id is not None: payload["disease"]          = disease_id
-    if center_id  is not None: payload["referralCenterId"] = center_id
+    if center_id  is not None: payload["referralCenterId"] = location_id
 
     try:
         result = _post("/addpatient", payload)

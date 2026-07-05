@@ -1,2 +1,5 @@
 .env
 config.py
+chatbot.log
+leads.db
+__pycache__
